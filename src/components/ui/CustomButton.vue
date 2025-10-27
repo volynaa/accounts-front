@@ -30,7 +30,6 @@
 	.delete-btn {
 		background: none;
 		border: none;
-		padding: 8px;
 		border-radius: 6px;
 		cursor: pointer;
 		transition: all 0.2s ease-in-out;
@@ -51,6 +50,15 @@
 			width: 20px;
 			height: 20px;
 			transition: filter 0.2s ease-in-out;
+			margin-top: 10px;
+
+			@media (max-width: 670px) {
+				margin-top: 5px;
+			}
+
+			@media (max-width: 576px) {
+				margin-top: 20px;
+			}
 		}
 	}
 </style>

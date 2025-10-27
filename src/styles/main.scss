@@ -66,36 +66,44 @@ body {
     height: 100%;
     margin: 0;
 }
-
+button {
+    padding: 0;
+}
 .main-container {
     width: 100%;
     max-width: 1360px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 20px;
+
+    @media (max-width: 376px) {
+        padding: 5px;
+    }
 }
 
-h1{
+h1 {
     font-family: var(--font-family-700);
     font-weight: 700;
     font-size: 32px;
     line-height: 48px;
-    margin-bottom: 15px;
 }
-h2{
+
+h2 {
     font-family: var(--font-family-600);
     font-weight: 600;
     font-size: 28px;
     line-height: 36px;
     margin-bottom: 15px;
 }
-h3{
+
+h3 {
     font-family: var(--font-family-600);
     font-weight: 600;
     font-size: 20px;
     line-height: 28px;
     margin-bottom: 15px;
 }
-p{
+
+p {
     font-family: var(--font-family-400);
     font-weight: 400;
     font-size: 18px;
@@ -103,5 +111,3 @@ p{
     color: var(--text-grey);
     margin-bottom: 15px;
 }
-
-

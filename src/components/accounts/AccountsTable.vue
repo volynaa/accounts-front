@@ -1,5 +1,5 @@
 <template>
-	<table>
+	<table class="table table-borderless">
 		<thead>
 		<tr class="table-title">
 			<th scope="col">Метки</th>
@@ -36,10 +36,14 @@ const tableData = ref([
 ])
 </script>
 
-<style scoped>
-	.table-title{
-		color: var(--title-grey);
-		font-size: 14px;
-		line-height: 22px;
+<style scoped lang="scss">
+	.table{
+		&-title{
+			@media (max-width: 576px) {
+				color: var(--title-grey);
+				font-size: 14px;
+				line-height: 22px;
+			}
+		}
 	}
 </style>
