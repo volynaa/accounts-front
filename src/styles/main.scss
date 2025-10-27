@@ -1,6 +1,107 @@
+@font-face {
+    font-family: 'Inter';
+    src: local('Inter'), url('../styles/fonts/Inter-VF.woff2') format('woff2'), url('../css/fonts/Inter-VF.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+}
+:root {
+    --font-family-400: 'Inter';
+    --font-family-500: 'Inter';
+    --font-family-600: 'Inter';
+    --font-family-700: 'Inter';
+    --font-family-800: 'Inter';
+}
+
+@supports not (font-variation-settings: normal) {
+
+    @font-face {
+        font-family: 'Inter regular';
+        src: local('Inter regular'), url('../styles/fonts/Inter-Regular.woff2') format('woff2'), url('../styles/fonts/Inter-Regular.ttf') format('truetype');
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Inter medium';
+        src: local('Inter medium'), url('../styles/fonts/Inter-Medium.woff2') format('woff2'), url('../styles/fonts/Inter-Medium.ttf') format('truetype');
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Inter semi bold';
+        src: local('Inter semi bold'), url('../styles/fonts/Inter-SemiBold.woff2') format('woff2'), url('../styles/fonts/Inter-SemiBold.ttf') format('truetype');
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Inter bold';
+        src: local('Inter bold'), url('../styles/fonts/Inter-Bold.woff2') format('woff2'), url('../styles/fonts/Inter-Bold.ttf') format('truetype');
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Inter extra bold';
+        src: local('Inter extra bold'), url('../styles/fonts/Inter-ExtraBold.woff2') format('woff2'), url('../styles/fonts/Inter-ExtraBold.ttf') format('truetype');
+        font-style: normal;
+        font-display: swap;
+    }
+
+    :root {
+        --font-family-400: 'Inter regular';
+        --font-family-500: 'Inter medium';
+        --font-family-600: 'Inter semi bold';
+        --font-family-700: 'Inter bold';
+        --font-family-800: 'Inter extra bold';
+    }
+}
+
+body {
+    font-family: var(--font-family-400);
+    font-weight: 400;
+    color: var(--headings-black);
+    height: 100%;
+    margin: 0;
+}
+
 .main-container {
     width: 100%;
     max-width: 1360px;
     margin: 0 auto;
     padding: 0 20px;
 }
+
+h1{
+    font-family: var(--font-family-700);
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 48px;
+    margin-bottom: 15px;
+}
+h2{
+    font-family: var(--font-family-600);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 36px;
+    margin-bottom: 15px;
+}
+h3{
+    font-family: var(--font-family-600);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
+    margin-bottom: 15px;
+}
+p{
+    font-family: var(--font-family-400);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 26px;
+    color: var(--text-grey);
+    margin-bottom: 15px;
+}
+
+
