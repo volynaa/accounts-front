@@ -27,29 +27,24 @@
 </template>
 
 <script setup lang="ts">
-	import {computed, ref} from "vue";
+	import {computed, onMounted, ref} from "vue";
 	import AccountsTable from "@/components/accounts/AccountsTable.vue";
 	import ModalAccept from "@/components/ui/ModalAccept.vue";
 	import { useNotificationStore } from "@/stores/notificationStore";
 	import type {Account} from "@/types/accounts.ts";
+	import {useAccountsStore} from "@/stores/accountStore.ts";
 	const notificationStore = useNotificationStore()
+	const accountStore = useAccountsStore()
+
 	const modalDelete = ref(false);
 	const deleteLogin = ref('');
-	const accounts = ref<Account[]>([
-		{label: '', type: 'LDAP', login: '1', password: '' },
-		{label: '', type: 'LDAP', login: '23', password: '' },
-		{label: '', type: 'LDAP', login: '33', password: '' }
-	])
+	const accounts = ref<Account[]>([]);
+
 	const message = computed(() => {
 		return `Вы уверены, что хотите удалить запись <strong>${deleteLogin.value}</strong>?`
-	})
+	});
 	function handleNewAccount(){
-		accounts.value.push({
-			label: '',
-			type: 'LDAP',
-			login: '',
-			password: ''
-		})
+		accountStore.addAccount();
 	}
 	function handleEditAccount(){
 
@@ -58,18 +53,24 @@
 		const index = accounts.value.findIndex((item: Account) => item.login === deleteLogin.value);
 		if(index >= 0){
 			accounts.value.splice(index, 1);
+			accountStore.removeAccount(deleteLogin.value);
 			notificationStore.success('Успешно удалено!');
 		}
 		else notificationStore.error('Ошибка при удалении записи');
+		deleteLogin.value = '';
 		handleModalClose();
 	}
 	function handleModalClose(){
-		modalDelete.value = false
+		modalDelete.value = false;
 	}
 	function handleModalOpen(data:string){
-		deleteLogin.value = data
-		modalDelete.value = true
+		deleteLogin.value = data;
+		modalDelete.value = true;
 	}
+
+	onMounted(() => {
+		accounts.value = accountStore.accounts;
+	})
 </script>
 
 <style scoped lang="scss">
