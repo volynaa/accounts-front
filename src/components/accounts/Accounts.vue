@@ -13,8 +13,9 @@
 	<main>
 		<AccountsTable
 			:accounts="accounts"
-			@edit="handleEditAccount"
+			tooltipText="Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;"
 			@delete="handleModalOpen"
+			@changeType="changeType"
 		/>
 	</main>
 
@@ -37,35 +38,43 @@
 	const accountStore = useAccountsStore()
 
 	const modalDelete = ref(false);
-	const deleteLogin = ref('');
+	const deleteAcc = ref(null);
 	const accounts = ref<Account[]>([]);
 
 	const message = computed(() => {
-		return `Вы уверены, что хотите удалить запись <strong>${deleteLogin.value}</strong>?`
+		return `Вы уверены, что хотите удалить запись <strong>${deleteAcc.value.login}</strong>?`
 	});
 	function handleNewAccount(){
 		accountStore.addAccount();
-	}
-	function handleEditAccount(){
-
+		accounts.value = accountStore.accounts;
 	}
 	function handleModalConfirm(){
-		const index = accounts.value.findIndex((item: Account) => item.login === deleteLogin.value);
+		const index = accounts.value.findIndex((item: Account) => item.id === deleteAcc.value.id);
 		if(index >= 0){
 			accounts.value.splice(index, 1);
-			accountStore.removeAccount(deleteLogin.value);
+			accountStore.removeAccount(deleteAcc.value.id);
 			notificationStore.success('Успешно удалено!');
 		}
 		else notificationStore.error('Ошибка при удалении записи');
-		deleteLogin.value = '';
+		deleteAcc.value = null;
 		handleModalClose();
 	}
 	function handleModalClose(){
 		modalDelete.value = false;
 	}
-	function handleModalOpen(data:string){
-		deleteLogin.value = data;
+	function handleModalOpen(login: string, id: number){
+		deleteAcc.value ={
+			login: login,
+			id: id
+		};
 		modalDelete.value = true;
+	}
+	function changeType(acc: Account) {
+		const index = accounts.value.findIndex(item => item.id === acc.id)
+		if(index >= 0){
+			accounts.value[index].type = acc.type
+			accounts.value[index].password = acc.password
+		}
 	}
 
 	onMounted(() => {

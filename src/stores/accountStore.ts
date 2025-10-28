@@ -3,23 +3,35 @@ import {defineStore} from "pinia";
 import type {Account} from "@/types/accounts.ts";
 
 export const useAccountsStore = defineStore('accounts', () => {
-  const accounts = ref<Account[]>([])
-
-  loadFromStorage()
+  const accounts = ref<Account[]>([]);
+  loadFromStorage();
 
   function addAccount() {
-    accounts.value.unshift({
+    const nextId = generateId();
+
+    accounts.value.push({
+      id: nextId+1,
       label: '',
       type: 'LDAP',
       login: '',
-      password: ''
+      password: null
     });
     saveToStorage();
   }
-
-  function removeAccount(login: string) {
-    accounts.value = accounts.value.filter(account => account.login !== login);
+  function generateId(){
+    return Math.max(0, ...accounts.value.map(acc => acc.id)) + 1;
+  }
+  function removeAccount(id: number) {
+    accounts.value = accounts.value.filter(account => account.id !== id);
     saveToStorage();
+  }
+
+  function changeAccount(acc: Account) {
+    const index = accounts.value.findIndex(item => item.id === acc.id)
+    if(index >= 0){
+      accounts.value[index] = acc;
+      saveToStorage();
+    }
   }
 
   function saveToStorage() {
@@ -41,6 +53,8 @@ export const useAccountsStore = defineStore('accounts', () => {
     accounts,
 
     addAccount,
+    generateId,
+    changeAccount,
     removeAccount
   }
 })

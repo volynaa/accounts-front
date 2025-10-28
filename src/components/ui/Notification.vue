@@ -24,7 +24,9 @@
 
 	const notificationStore = useNotificationStore()
 	const { notifications } = storeToRefs(notificationStore)
-	const { removeNotification } = notificationStore
+	function removeNotification(id: number){
+		notificationStore.removeNotification(id);
+	}
 </script>
 
 <style scoped lang="scss">

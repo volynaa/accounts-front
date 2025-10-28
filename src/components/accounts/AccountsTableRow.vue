@@ -1,45 +1,64 @@
 <template>
 	<tr class="accounts-table-row">
 		<th scope="row">
-			<input
-				v-model="rowData.label"
-				type="text"
-				class="form-control form-control-sm accounts-table-row__input"
+			<ValidationInput
+				v-model="localAccount.label"
 				placeholder="Введите метку"
 				:aria-label="`Метка записи ${rowNumber}`"
-			>
+				:validations="shouldValidate"
+				@valid="validateLabel"
+			/>
 		</th>
 		<td>
 			<select
-				v-model="rowData.type"
-				class="form-select form-select-sm accounts-table-row__input"
+				v-model="localAccount.type"
+				class="form-select form-select-sm validation-input"
 				:aria-label="`Тип учетной записи ${rowNumber}`"
+				@change="validateType"
 			>
 				<option value="LDAP">LDAP</option>
 				<option value="local">Локальная</option>
 			</select>
 		</td>
-		<td>
-			<input
-				v-model="rowData.login"
-				type="text"
-				class="form-control form-control-sm accounts-table-row__input"
+		<td :colspan="isLDAP ? 2 : 1">
+			<ValidationInput
+				v-model="localAccount.login"
+				:max-length="100"
+				:required="true"
 				placeholder="Введите логин"
 				:aria-label="`Логин ${rowNumber}`"
-			>
+				:validations="shouldValidate"
+				@valid="validateLogin"
+			/>
 		</td>
-		<td>
-			<input
-				v-model="rowData.password"
-				type="password"
-				class="form-control form-control-sm accounts-table-row__input"
+		<td v-if="!isLDAP&&passwordNoEmpty" class="position-relative">
+			<ValidationInput
+				v-model="localAccount.password"
+				:type="showPassword ? 'text' : 'password'"
+				:max-length="100"
+				:required="true"
 				placeholder="Введите пароль"
 				:aria-label="`Пароль ${rowNumber}`"
+				:validations="shouldValidate"
+				@valid="validatePassword"
+			/>
+			<button
+				v-if="localAccount.password"
+				type="button"
+				class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-secondary p-0 me-2"
+				@click="showPassword = !showPassword"
+				:aria-label="showPassword ? 'Скрыть пароль' : 'Показать пароль'"
 			>
+				<img
+					:src="showPassword ? '/image/accounts/eye-show.svg' : '/image/accounts/eye-hide.svg'"
+					:alt="showPassword ? 'Скрыть пароль' : 'Показать пароль'"
+					class="show-icon"
+				>
+			</button>
 		</td>
 		<td>
 			<CustomButton
-				src="/image/trash.svg"
+				src="/image/accounts/trash.svg"
 				alt="Удалить запись"
 				@delete="handleDeleteAccount()"
 			/>
@@ -48,75 +67,124 @@
 </template>
 
 <script setup lang="ts">
-import CustomButton from "@/components/ui/CustomButton.vue";
+	import CustomButton from "@/components/ui/CustomButton.vue";
+	import {computed, ref} from "vue";
+	import ValidationInput from "@/components/ui/ValidationInput.vue";
+	import {useAccountsStore} from "@/stores/accountStore.ts";
+	import type {Account} from "@/types/accounts.ts";
+	const accountStore = useAccountsStore()
+	interface TableRow {
+		id: number
+		label: string
+		type: string
+		login: string
+		password: string
+	}
 
-interface TableRow {
-	id: number
-	label: string
-	type: string
-	login: string
-	password: string
-}
+	interface Props {
+		rowData: TableRow
+		rowNumber: number
+		placeholder?: string
+	}
 
-interface Props {
-	rowData: TableRow
-	rowNumber: number
-	placeholder?: string
-}
+	const props = defineProps<Props>();
+	const emit = defineEmits<{
+		delete: [login: string, id: number]
+		changeType: [acc: Account]
+	}>();
 
-const props = defineProps<Props>()
+	const isLDAP = computed(() => localAccount.value.type === 'LDAP');
+	const passwordNoEmpty = computed(() => localAccount.value.password !== null);
+	const showPassword = ref(false);
+	const shouldValidate = ref(false);
+	const localAccount = ref({
+		...props.rowData,
+		label: Array.isArray(props.rowData.label)
+			? props.rowData.label.map(item => item.text).join('; ')
+			: props.rowData.label
+	});
+	const isLabelValid = ref(true);
+	const isLoginValid = ref(!!props.rowData.login);
+	const isPasswordValid = ref(true);
 
-const emit = defineEmits<{
-	delete: [login: string]
-}>()
+	function validateLabel() {
+		if (localAccount.value.label.length > 50) {
+			isLabelValid.value = false;
+		}
+		isLabelValid.value = true;
+		checkOverallValidity();
+	}
+	function validateType() {
+		if(localAccount.value.type === 'local'){
+			localAccount.value.password = '';
+			isPasswordValid.value = false;
+			shouldValidate.value = true;
+		}
+		else{
+			localAccount.value.password = null;
+			isPasswordValid.value = true;
+			checkOverallValidity();
+		}
+		emit('changeType',localAccount.value);
+	}
+	function validateLogin() {
+		if (!localAccount.value.login.trim()) {
+			isLoginValid.value = false;
+		}
+		if (localAccount.value.login.length > 100) {
+			isLoginValid.value = false;
+		}
+		isLoginValid.value = true;
+		checkOverallValidity();
+	}
 
-function handleDeleteAccount(){
-	emit('delete', props.rowData.login);
-}
+	function validatePassword() {
+		if (localAccount.value.type === 'local') {
+			if (!localAccount.value.password) {
+				isPasswordValid.value = false;
+			}
+			if (localAccount.value.password.length > 100) {
+				isPasswordValid.value = false;
+			}
+		}
+		isPasswordValid.value = true;
+		checkOverallValidity();
+	}
+
+	function checkOverallValidity() {
+		const isValid = isLabelValid.value && isLoginValid.value && isPasswordValid.value;
+
+		if (isValid) {
+			const accountToSave = {
+				...localAccount.value,
+				label: localAccount.value.label
+					.split(';')
+					.map(item => item.trim())
+					.filter(item => item)
+					.map(text => ({ text }))
+			}
+			accountStore.changeAccount(accountToSave);
+		}
+	}
+
+	function handleDeleteAccount(){
+		emit('delete', localAccount.value.login, localAccount.value.id);
+	}
+
 
 </script>
 
 <style scoped lang="scss">
-.accounts-table-row {
-	transition: background-color 0.15s ease;
-	max-height: 40px;
+	.accounts-table-row {
+		transition: background-color 0.15s ease;
+		max-height: 40px;
 
-	&:hover {
-		background-color: var(--color-gray-50);
-	}
-
-	&__input{
-		height: 40px;
-		font-family: var(--font-family-600);
-		font-weight: 600;
-		font-size: 18px;
-		line-height: 24px;
-
-		@media (max-width: 670px) {
-			height: 30px;
-			font-size: 14px;
-			line-height: 16px;
+		&:hover {
+			background-color: var(--color-gray-50);
 		}
 
-		@media (max-width: 576px) {
-			height: 60px;
-			font-size: 14px;
-			line-height: 16px;
-		}
-
-		&::placeholder{
-			font-family: var(--font-family-400);
-			font-weight: 400;
-			font-size: 16px;
-			line-height: 20px;
-			white-space: normal;
-			word-wrap: break-word;
-			overflow-wrap: break-word;
-
-			@media (max-width: 670px) {
-				font-size: 12px;
-			}
+		.show-icon{
+			padding: 5px;
 		}
 	}
-}
 </style>
