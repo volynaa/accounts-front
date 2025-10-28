@@ -1,3 +1,6 @@
 export interface Account {
-    text: string
+    label: string,
+    type: string,
+    login: string,
+    password: string
 }

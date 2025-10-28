@@ -4,6 +4,7 @@
 		<button
 			class="add-btn"
 			type="button"
+			@click="handleNewAccount"
 		>
 			+
 		</button>
@@ -13,31 +14,61 @@
 		<AccountsTable
 			:accounts="accounts"
 			@edit="handleEditAccount"
-			@delete="handleDeleteAccount"
+			@delete="handleModalOpen"
 		/>
 	</main>
 
 	<ModalAccept
 		v-if="modalDelete"
-		message="Вы уверены, что хотите удалить данную запись?"
+		:message="message"
+		@cancel="modalDelete = false"
+		@confirm="handleModalConfirm"
 	/>
 </template>
 
 <script setup lang="ts">
-	import {ref} from "vue";
+	import {computed, ref} from "vue";
 	import AccountsTable from "@/components/accounts/AccountsTable.vue";
-	import type {Account} from "@/types/accounts.ts";
 	import ModalAccept from "@/components/ui/ModalAccept.vue";
-
-	const accounts = ref<Account[]>([]);
-	const modalDelete = ref(false)
-
+	import { useNotificationStore } from "@/stores/notificationStore";
+	import type {Account} from "@/types/accounts.ts";
+	const notificationStore = useNotificationStore()
+	const modalDelete = ref(false);
+	const deleteLogin = ref('');
+	const accounts = ref<Account[]>([
+		{label: '', type: 'LDAP', login: '1', password: '' },
+		{label: '', type: 'LDAP', login: '23', password: '' },
+		{label: '', type: 'LDAP', login: '33', password: '' }
+	])
+	const message = computed(() => {
+		return `Вы уверены, что хотите удалить запись <strong>${deleteLogin.value}</strong>?`
+	})
+	function handleNewAccount(){
+		accounts.value.push({
+			label: '',
+			type: 'LDAP',
+			login: '',
+			password: ''
+		})
+	}
 	function handleEditAccount(){
 
 	}
-
-	function handleDeleteAccount(){
-
+	function handleModalConfirm(){
+		const index = accounts.value.findIndex((item: Account) => item.login === deleteLogin.value);
+		if(index >= 0){
+			accounts.value.splice(index, 1);
+			notificationStore.success('Успешно удалено!');
+		}
+		else notificationStore.error('Ошибка при удалении записи');
+		handleModalClose();
+	}
+	function handleModalClose(){
+		modalDelete.value = false
+	}
+	function handleModalOpen(data:string){
+		deleteLogin.value = data
+		modalDelete.value = true
 	}
 </script>
 

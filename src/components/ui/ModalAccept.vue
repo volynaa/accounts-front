@@ -1,16 +1,16 @@
 <template>
-	<div class="modal-overlay" @click="emit('cancel')">
+	<div class="modal-overlay" @click="$emit('cancel')">
 		<div class="modal-content" @click.stop>
 			<div class="modal-header">
 				<h3>{{ title }}</h3>
-				<button class="close-btn" @click="emit('cancel')">&times;</button>
+				<button class="close-btn" @click="$emit('cancel')">&times;</button>
 			</div>
 			<div class="modal-body">
-				<p>{{ message }}</p>
+				<p v-html="message"></p>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-cancel" @click="emit('cancel')">Отмена</button>
-				<button class="btn btn-delete" @click="emit('confirm')">Удалить</button>
+				<button class="btn btn-cancel" @click="$emit('cancel')">Отмена</button>
+				<button class="btn btn-delete" @click="$emit('confirm')">Удалить</button>
 			</div>
 		</div>
 	</div>
@@ -27,7 +27,7 @@ withDefaults(defineProps<Props>(), {
 	message: 'Вы уверены, что хотите удалить этот элемент?'
 })
 
-const emit = defineEmits<{
+defineEmits<{
 	confirm: []
 	cancel: []
 }>()

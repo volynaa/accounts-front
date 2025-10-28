@@ -1,11 +1,11 @@
 <template>
 	<tr class="accounts-table-row">
-		<th scope="row" class="">
+		<th scope="row">
 			<input
 				v-model="rowData.label"
 				type="text"
 				class="form-control form-control-sm accounts-table-row__input"
-				:placeholder="placeholder"
+				placeholder="Введите метку"
 				:aria-label="`Метка записи ${rowNumber}`"
 			>
 		</th>
@@ -41,6 +41,7 @@
 			<CustomButton
 				src="/image/trash.svg"
 				alt="Удалить запись"
+				@delete="handleDeleteAccount()"
 			/>
 		</td>
 	</tr>
@@ -63,19 +64,23 @@ interface Props {
 	placeholder?: string
 }
 
-withDefaults(defineProps<Props>(), {
-	placeholder: 'Введите метку'
-})
+const props = defineProps<Props>()
 
-const handleDelete = () => {
+const emit = defineEmits<{
+	delete: [login: string]
+}>()
 
+function handleDeleteAccount(){
+	emit('delete', props.rowData.login);
 }
+
 </script>
 
 <style scoped lang="scss">
 .accounts-table-row {
 	transition: background-color 0.15s ease;
 	max-height: 40px;
+
 	&:hover {
 		background-color: var(--color-gray-50);
 	}

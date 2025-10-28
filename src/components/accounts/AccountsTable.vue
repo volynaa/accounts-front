@@ -10,13 +10,14 @@
 		</thead>
 		<tbody>
 			<AccountsTableRow
-				v-for="(row, index) in tableData"
-				:key="row.id"
+				v-for="(row, index) in accounts"
+				:key="index"
 				:row-data="row"
 				:row-number="index + 1"
+				@delete="$emit('delete', $event)"
 			/>
 
-			<tr v-if="!tableData.length">
+			<tr v-if="!accounts?.length">
 				<td colspan="4" class="text-center py-5 text-muted">
 					Записей пока нет
 				</td>
@@ -26,14 +27,17 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
 import AccountsTableRow from "@/components/accounts/AccountsTableRow.vue";
+import type {Account} from "@/types/accounts.ts";
 
-const tableData = ref([
-	{ id: 1, label: '', type: '', login: '', password: '' },
-	{ id: 2, label: '', type: '', login: '', password: '' },
-	{ id: 3, label: '', type: '', login: '', password: '' }
-])
+interface Props {
+	accounts: Account[]
+}
+
+defineProps<Props>()
+defineEmits<{
+	delete: [id: number]
+}>()
 </script>
 
 <style scoped lang="scss">
