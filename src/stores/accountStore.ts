@@ -6,32 +6,28 @@ export const useAccountsStore = defineStore('accounts', () => {
   const accounts = ref<Account[]>([]);
   loadFromStorage();
 
-  function addAccount() {
-    const nextId = generateId();
+  function generateId() {
+    return Math.max(0, ...accounts.value.map((acc: Account) => acc.id)) + 1;
+  }
 
-    accounts.value.push({
-      id: nextId+1,
-      label: '',
-      type: 'LDAP',
-      login: '',
-      password: null
-    });
-    saveToStorage();
-  }
-  function generateId(){
-    return Math.max(0, ...accounts.value.map(acc => acc.id)) + 1;
-  }
   function removeAccount(id: number) {
-    accounts.value = accounts.value.filter(account => account.id !== id);
+    accounts.value = accounts.value.filter((account: Account) => account.id !== id);
     saveToStorage();
   }
 
   function changeAccount(acc: Account) {
-    const index = accounts.value.findIndex(item => item.id === acc.id)
-    if(index >= 0){
+    const index = accounts.value.findIndex((item: Account) => item.id === acc.id)
+    if (index >= 0) {
       accounts.value[index] = acc;
-      saveToStorage();
+    } else {
+      accounts.value.push(acc);
     }
+    saveToStorage();
+
+  }
+
+  function getAccounts() {
+    return accounts.value;
   }
 
   function saveToStorage() {
@@ -50,10 +46,8 @@ export const useAccountsStore = defineStore('accounts', () => {
   }
 
   return {
-    accounts,
-
-    addAccount,
     generateId,
+    getAccounts,
     changeAccount,
     removeAccount
   }

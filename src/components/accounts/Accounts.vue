@@ -33,7 +33,7 @@
 	import ModalAccept from "@/components/ui/ModalAccept.vue";
 	import { useNotificationStore } from "@/stores/notificationStore";
 	import type {Account} from "@/types/accounts.ts";
-	import {useAccountsStore} from "@/stores/accountStore.ts";
+	import {useAccountsStore} from "@/stores/accountStore";
 	const notificationStore = useNotificationStore()
 	const accountStore = useAccountsStore()
 
@@ -45,8 +45,13 @@
 		return `Вы уверены, что хотите удалить запись <strong>${deleteAcc.value.login}</strong>?`
 	});
 	function handleNewAccount(){
-		accountStore.addAccount();
-		accounts.value = accountStore.accounts;
+		accounts.value.push({
+			id: accountStore.generateId(),
+			label: '',
+			type: 'LDAP',
+			login: '',
+			password: null
+		});
 	}
 	function handleModalConfirm(){
 		const index = accounts.value.findIndex((item: Account) => item.id === deleteAcc.value.id);
@@ -70,15 +75,19 @@
 		modalDelete.value = true;
 	}
 	function changeType(acc: Account) {
-		const index = accounts.value.findIndex(item => item.id === acc.id)
+		const index = accounts.value.findIndex((item: Account) => item.id === acc.id)
 		if(index >= 0){
-			accounts.value[index].type = acc.type
-			accounts.value[index].password = acc.password
+			accounts.value[index] = {
+				...accounts.value[index],
+				type: acc.type,
+				password: acc.password
+			};
 		}
+		console.log(accountStore.getAccounts())
 	}
 
 	onMounted(() => {
-		accounts.value = accountStore.accounts;
+		accounts.value = [...accountStore.getAccounts()];
 	})
 </script>
 

@@ -6,7 +6,8 @@
 			:class="inputClasses"
 			:placeholder="placeholder"
 			:aria-label="ariaLabel"
-			@blur="markAsTouched"
+			@blur="forceValidate"
+			@change="handlerChange"
 		>
 		<p v-if="showError" class="invalid-label">
 			{{ errorMessage }}
@@ -31,12 +32,11 @@ import {ref, computed, watch, nextTick} from 'vue'
 		type: 'text',
 		maxLength: 50,
 		required: false,
-		validations: null
 	})
 
 	const emit = defineEmits<{
 		'update:modelValue': [value: string]
-		'valid': [isValid: boolean]
+		'valid': []
 	}>()
 
 	const inputValue = ref(props.modelValue)
@@ -61,24 +61,21 @@ import {ref, computed, watch, nextTick} from 'vue'
 	function validate() {
 		if (props.required && !inputValue.value.trim()) {
 			error.value = 'Это поле обязательно для заполнения';
-			emit('valid', false);
 			return;
 		}
 
 		if (inputValue.value.length > props.maxLength) {
 			error.value = `Максимум ${props.maxLength} символов`;
-			emit('valid', false);
 			return;
 		}
 
 		error.value = '';
-		emit('valid', true);
 	}
 
-	function markAsTouched() {
+	function handlerChange() {
 		emit('update:modelValue',inputValue.value);
-		isTouched.value = true;
 		validate();
+		emit('valid');
 	}
 
 	function forceValidate() {
@@ -88,16 +85,6 @@ import {ref, computed, watch, nextTick} from 'vue'
 
 	watch(() => props.modelValue, (newValue) => {
 		inputValue.value = newValue;
-		validate();
-	})
-	watch(() => props.validations, (newValue, oldValue) => {
-		nextTick(() => {
-			forceValidate()
-		})
-	})
-
-	defineExpose({
-		validate: forceValidate
 	})
 
 </script>

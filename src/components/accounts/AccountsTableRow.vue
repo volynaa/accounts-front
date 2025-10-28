@@ -5,7 +5,6 @@
 				v-model="localAccount.label"
 				placeholder="Введите метку"
 				:aria-label="`Метка записи ${rowNumber}`"
-				:validations="shouldValidate"
 				@valid="validateLabel"
 			/>
 		</th>
@@ -27,7 +26,6 @@
 				:required="true"
 				placeholder="Введите логин"
 				:aria-label="`Логин ${rowNumber}`"
-				:validations="shouldValidate"
 				@valid="validateLogin"
 			/>
 		</td>
@@ -39,7 +37,6 @@
 				:required="true"
 				placeholder="Введите пароль"
 				:aria-label="`Пароль ${rowNumber}`"
-				:validations="shouldValidate"
 				@valid="validatePassword"
 			/>
 			<button
@@ -70,9 +67,11 @@
 	import CustomButton from "@/components/ui/CustomButton.vue";
 	import {computed, ref} from "vue";
 	import ValidationInput from "@/components/ui/ValidationInput.vue";
-	import {useAccountsStore} from "@/stores/accountStore.ts";
+	import {useAccountsStore} from "@/stores/accountStore";
 	import type {Account} from "@/types/accounts.ts";
-	const accountStore = useAccountsStore()
+	import {useNotificationStore} from "@/stores/notificationStore";
+	const accountStore = useAccountsStore();
+	const notificationStore = useNotificationStore()
 	interface TableRow {
 		id: number
 		label: string
@@ -96,11 +95,10 @@
 	const isLDAP = computed(() => localAccount.value.type === 'LDAP');
 	const passwordNoEmpty = computed(() => localAccount.value.password !== null);
 	const showPassword = ref(false);
-	const shouldValidate = ref(false);
 	const localAccount = ref({
 		...props.rowData,
 		label: Array.isArray(props.rowData.label)
-			? props.rowData.label.map(item => item.text).join('; ')
+			? props.rowData.label.map(item => item.text).join(';')
 			: props.rowData.label
 	});
 	const isLabelValid = ref(true);
@@ -118,7 +116,6 @@
 		if(localAccount.value.type === 'local'){
 			localAccount.value.password = '';
 			isPasswordValid.value = false;
-			shouldValidate.value = true;
 		}
 		else{
 			localAccount.value.password = null;
@@ -153,17 +150,18 @@
 
 	function checkOverallValidity() {
 		const isValid = isLabelValid.value && isLoginValid.value && isPasswordValid.value;
-
 		if (isValid) {
 			const accountToSave = {
 				...localAccount.value,
 				label: localAccount.value.label
 					.split(';')
-					.map(item => item.trim())
-					.filter(item => item)
-					.map(text => ({ text }))
+					.map((item: string) => item.trim())
+					.filter((item: string) => item)
+					.map((text: string) => ({ text }))
 			}
+			console.log(accountToSave)
 			accountStore.changeAccount(accountToSave);
+			notificationStore.success('Запись успешно сохранена!');
 		}
 	}
 
